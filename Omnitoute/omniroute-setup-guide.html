@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OmniRoute + Claude Code — Setup Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root[data-theme="dark"] {
+    --bg: #0D1117;
+    --surface: #161B22;
+    --surface2: #1E2530;
+    --border: #2A3441;
+    --accent: #7C6AF7;
+    --accent-glow: rgba(124,106,247,0.25);
+    --accent2: #00D2FF;
+    --text: #E6EDF3;
+    --text-muted: #8B949E;
+    --text-dim: #6E7681;
+    --code-bg: #0D1117;
+    --win-color: #00A8FF;
+    --mac-color: #A8FF78;
+    --warning: #F0A400;
+    --success: #3FB950;
+    --step-num-bg: rgba(124,106,247,0.15);
+    --tab-active-bg: rgba(124,106,247,0.15);
+    --copy-hover: #2A3441;
+    --badge-bg: rgba(0,210,255,0.12);
+  }
+  :root[data-theme="light"] {
+    --bg: #F0F2F5;
+    --surface: #FFFFFF;
+    --surface2: #F6F8FA;
+    --border: #D0D7DE;
+    --accent: #6E56CF;
+    --accent-glow: rgba(110,86,207,0.15);
+    --accent2: #0969DA;
+    --text: #1A1F2E;
+    --text-muted: #57606A;
+    --text-dim: #8C959F;
+    --code-bg: #F6F8FA;
+    --win-color: #0969DA;
+    --mac-color: #1A7F37;
+    --warning: #9A6700;
+    --success: #1A7F37;
+    --step-num-bg: rgba(110,86,207,0.1);
+    --tab-active-bg: rgba(110,86,207,0.1);
+    --copy-hover: #F0F2F5;
+    --badge-bg: rgba(9,105,218,0.1);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: sticky; top:0; z-index:100;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex; align-items:center; justify-content:space-between;
+    height: 60px;
+    backdrop-filter: blur(12px);
+  }
+  .logo {
+    display:flex; align-items:center; gap:10px;
+  }
+  .logo-icon {
+    width:32px; height:32px; border-radius:8px;
+    background: linear-gradient(135deg, #7C6AF7, #00D2FF);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:700; color:#fff;
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+  .logo-text { font-weight:700; font-size:15px; }
+  .logo-text span { color: var(--accent); }
+  .logo-version {
+    font-size:11px; color:var(--text-dim);
+    background:var(--surface2); border:1px solid var(--border);
+    padding:2px 7px; border-radius:20px; margin-left:4px;
+  }
+
+  .header-right { display:flex; align-items:center; gap:12px; }
+  .theme-btn {
+    background: var(--surface2); border:1px solid var(--border);
+    color:var(--text-muted); cursor:pointer; border-radius:8px;
+    padding:6px 12px; font-size:13px; font-family:inherit;
+    display:flex; align-items:center; gap:6px;
+    transition: all 0.15s;
+  }
+  .theme-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+  /* ─── HERO ─── */
+  .hero {
+    text-align:center; padding: 52px 24px 36px;
+    max-width: 700px; margin:0 auto;
+  }
+  .hero-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background: var(--badge-bg); border:1px solid var(--border);
+    color:var(--accent2); font-size:12px; font-weight:500;
+    padding:4px 12px; border-radius:20px; margin-bottom:20px;
+  }
+  .hero h1 {
+    font-size:clamp(24px,4vw,36px); font-weight:700; line-height:1.2;
+    letter-spacing:-0.5px; margin-bottom:14px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    color:var(--text-muted); font-size:15px; line-height:1.6;
+    max-width:520px; margin:0 auto;
+  }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow {
+    display:flex; align-items:center; justify-content:center;
+    gap:0; margin: 28px auto; flex-wrap:wrap;
+    max-width:600px;
+  }
+  .flow-node {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:6px 14px; font-size:12px;
+    font-weight:600; white-space:nowrap;
+  }
+  .flow-node.accent { border-color:var(--accent); color:var(--accent); background:var(--tab-active-bg); }
+  .flow-arrow {
+    color:var(--text-dim); font-size:16px; padding:0 6px;
+  }
+
+  /* ─── OS TABS ─── */
+  .os-tabs-wrap {
+    max-width: 860px; margin:0 auto; padding: 0 20px;
+  }
+  .os-tabs {
+    display:flex; gap:8px; margin-bottom:24px;
+    border-bottom:2px solid var(--border);
+    padding-bottom:0;
+  }
+  .os-tab {
+    padding:10px 22px; border-radius:8px 8px 0 0;
+    cursor:pointer; font-size:14px; font-weight:600;
+    border:none; background:transparent; color:var(--text-muted);
+    display:flex; align-items:center; gap:8px;
+    border-bottom:2px solid transparent; margin-bottom:-2px;
+    transition:all 0.15s; font-family:inherit;
+  }
+  .os-tab .os-icon { font-size:16px; }
+  .os-tab:hover { color:var(--text); }
+  .os-tab.active.win { color:var(--win-color); border-bottom-color:var(--win-color); background:rgba(0,168,255,0.06); }
+  .os-tab.active.mac { color:var(--mac-color); border-bottom-color:var(--mac-color); background:rgba(168,255,120,0.06); }
+
+  /* ─── CONTENT PANELS ─── */
+  .panel { display:none; }
+  .panel.active { display:block; }
+
+  /* ─── STEPS ─── */
+  .steps { display:flex; flex-direction:column; gap:20px; }
+
+  .step-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; overflow:hidden;
+    transition: border-color 0.15s;
+  }
+  .step-card:hover { border-color: var(--accent); }
+
+  .step-header {
+    display:flex; align-items:center; gap:14px;
+    padding:18px 20px 14px;
+  }
+  .step-num {
+    width:32px; height:32px; border-radius:8px; flex-shrink:0;
+    background:var(--step-num-bg); border:1px solid var(--accent);
+    color:var(--accent); font-weight:700; font-size:13px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+  }
+  .step-title { font-weight:600; font-size:15px; }
+  .step-subtitle { font-size:12px; color:var(--text-muted); margin-top:2px; }
+
+  .step-body {
+    padding: 0 20px 18px 66px;
+  }
+  .step-desc {
+    font-size:13.5px; color:var(--text-muted); line-height:1.65;
+    margin-bottom:12px;
+  }
+
+  /* ─── CODE BLOCK ─── */
+  .code-block {
+    background:var(--code-bg); border:1px solid var(--border);
+    border-radius:8px; overflow:hidden; margin-bottom:12px;
+  }
+  .code-topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 14px;
+    border-bottom:1px solid var(--border);
+    background:var(--surface2);
+  }
+  .code-lang {
+    font-size:11px; font-weight:600; color:var(--text-dim);
+    text-transform:uppercase; letter-spacing:0.5px;
+    font-family:'JetBrains Mono', monospace;
+  }
+  .copy-btn {
+    background:transparent; border:1px solid var(--border);
+    color:var(--text-muted); cursor:pointer;
+    font-size:11px; font-weight:500; font-family:'Inter',sans-serif;
+    padding:3px 10px; border-radius:6px;
+    display:flex; align-items:center; gap:5px;
+    transition:all 0.15s;
+  }
+  .copy-btn:hover { background:var(--copy-hover); color:var(--text); border-color:var(--accent); }
+  .copy-btn.copied { color:var(--success); border-color:var(--success); }
+
+  pre {
+    padding:14px 16px; overflow-x:auto;
+    font-family:'JetBrains Mono', monospace; font-size:13px;
+    line-height:1.7; color:var(--text);
+  }
+  pre .cmd { color:#79C0FF; }
+  pre .flag { color:#A5D6FF; }
+  pre .val { color:#A8FF78; }
+  pre .comment { color:var(--text-dim); font-style:italic; }
+  pre .env-key { color:#FFB86C; }
+  pre .env-val { color:#A8FF78; }
+  pre .prompt { color:var(--text-dim); user-select:none; }
+
+  /* ─── WARNING / TIP BOXES ─── */
+  .box {
+    border-radius:8px; padding:12px 16px;
+    font-size:13px; line-height:1.6;
+    display:flex; gap:10px; margin-bottom:12px;
+    border:1px solid;
+  }
+  .box-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+  .box.warn { background:rgba(240,164,0,0.08); border-color:rgba(240,164,0,0.3); color:var(--warning); }
+  .box.tip  { background:rgba(63,185,80,0.08); border-color:rgba(63,185,80,0.3); color:var(--success); }
+  .box.info { background:var(--badge-bg); border-color:var(--border); color:var(--text-muted); }
+
+  /* ─── TABLE ─── */
+  .var-table {
+    width:100%; border-collapse:collapse;
+    font-size:12.5px; margin-top:10px;
+  }
+  .var-table th {
+    text-align:left; padding:8px 12px;
+    background:var(--surface2); color:var(--text-dim);
+    font-weight:600; border-bottom:1px solid var(--border);
+    font-size:11px; text-transform:uppercase; letter-spacing:0.4px;
+  }
+  .var-table td {
+    padding:9px 12px; border-bottom:1px solid var(--border);
+    color:var(--text-muted); vertical-align:top;
+  }
+  .var-table tr:last-child td { border-bottom:none; }
+  .var-table td:first-child {
+    font-family:'JetBrains Mono', monospace;
+    color:var(--env-key, #FFB86C); font-size:12px;
+    white-space:nowrap;
+  }
+
+  /* ─── SUCCESS BANNER ─── */
+  .success-banner {
+    background: linear-gradient(135deg, rgba(124,106,247,0.12), rgba(0,210,255,0.08));
+    border:1px solid rgba(124,106,247,0.3);
+    border-radius:12px; padding:24px; text-align:center; margin-top:8px;
+  }
+  .success-banner .emoji { font-size:36px; margin-bottom:10px; }
+  .success-banner h3 { font-size:17px; margin-bottom:8px; }
+  .success-banner p { font-size:13px; color:var(--text-muted); line-height:1.6; }
+
+  /* ─── PROVIDER GRID ─── */
+  .provider-grid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr));
+    gap:10px; margin-top:10px;
+  }
+  .provider-chip {
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:8px; padding:10px 14px;
+    font-size:12.5px; font-weight:500;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .provider-chip .p-name { color:var(--text); }
+  .provider-chip .p-method {
+    font-size:11px; color:var(--accent2);
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align:center; padding:32px 20px;
+    color:var(--text-dim); font-size:12px; border-top:1px solid var(--border);
+    margin-top:40px;
+  }
+
+  @media(max-width:600px) {
+    .step-body { padding-left:20px; }
+    .flow { gap:4px; }
+    pre { font-size:11.5px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">OR</div>
+    <div>
+      <div class="logo-text">OmniRoute <span>+</span> Claude Code</div>
+    </div>
+    <span class="logo-version">v3.8.51</span>
+  </div>
+  <div class="header-right">
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">📖 Complete Setup Guide</div>
+  <h1>Route <span>Claude Code</span> through<br/>OmniRoute — Free & Local</h1>
+  <p>One local server. 350+ AI providers. Auto-fallback. Zero API cost to start. Follow the steps below for your OS.</p>
+
+  <div class="flow">
+    <div class="flow-node">Claude Code</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node accent">OmniRoute :20128</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">omni_combo</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">350+ Providers</div>
+  </div>
+</div>
+
+<!-- OS TABS -->
+<div class="os-tabs-wrap">
+  <div class="os-tabs">
+    <button class="os-tab active win" onclick="switchTab('win')" id="tab-win">
+      <span class="os-icon">🪟</span> Windows
+    </button>
+    <button class="os-tab mac" onclick="switchTab('mac')" id="tab-mac">
+      <span class="os-icon">🍎</span> macOS
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       WINDOWS PANEL
+  ══════════════════════════════════════════ -->
+  <div class="panel active" id="panel-win">
+    <div class="steps">
+
+      <!-- STEP 1 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">01</div>
+          <div>
+            <div class="step-title">Install OmniRoute</div>
+            <div class="step-subtitle">Requires Node.js v18+. Run once globally.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Open <strong>PowerShell</strong> or <strong>Command Prompt</strong> and run:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="prompt">PS &gt; </span><span class="cmd">npm</span> <span class="flag">i -g</span> <span class="val">omniroute</span></pre>
+          </div>
+          <div class="box info">
+            <span class="box-icon">ℹ️</span>
+            <span>Don't have Node.js? Download it from <strong>nodejs.org</strong> (v18 or higher recommended).</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">02</div>
+          <div>
+            <div class="step-title">Start the OmniRoute Server</div>
+            <div class="step-subtitle">Keep this terminal open the entire time.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">In the same PowerShell window, run:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="prompt">PS &gt; </span><span class="cmd">omniroute</span></pre>
+          </div>
+          <div class="box warn">
+            <span class="box-icon">⚠️</span>
+            <span><strong>Do not close this window.</strong> OmniRoute must keep running in the background. For the next steps, open a <strong>new PowerShell window</strong>.</span>
+          </div>
+          <p class="step-desc">Then open your browser and go to:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Browser URL</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre>http://localhost:20128/home</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">03</div>
+          <div>
+            <div class="step-title">Connect Your AI Providers</div>
+            <div class="step-subtitle">Go to Providers section in the web dashboard.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">In the OmniRoute dashboard, click <strong>Providers</strong> in the left sidebar and add these four:</p>
+          <div class="provider-grid">
+            <div class="provider-chip">
+              <span class="p-name">🔑 Antigravity</span>
+              <span class="p-method">Auth Login (OAuth)</span>
+            </div>
+            <div class="provider-chip">
+              <span class="p-name">🦙 Ollama</span>
+              <span class="p-method">API Key / Local</span>
+            </div>
+            <div class="provider-chip">
+              <span class="p-name">🌐 OpenRouter</span>
+              <span class="p-method">API Key</span>
+            </div>
+            <div class="provider-chip">
+              <span class="p-name">🪁 Kiro</span>
+              <span class="p-method">API Key</span>
+            </div>
+          </div>
+          <div class="box tip" style="margin-top:14px;">
+            <span class="box-icon">✅</span>
+            <span>Free providers like <strong>OpenCode Zen</strong> and <strong>SiliconFlow</strong> require no API key — add them too for maximum free quota!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">04</div>
+          <div>
+            <div class="step-title">Create Your Combo</div>
+            <div class="step-subtitle">Combine all providers into one smart route.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">In the dashboard → <strong>Combos</strong> → Create New Combo. Chain providers in this order and name it <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;">omni_combo</code>:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Combo Config</span>
+            </div>
+            <pre><span class="val">Antigravity</span>  <span class="comment">← Priority 1 (OAuth, subscription-level)</span>
+    ↓
+<span class="val">Ollama</span>       <span class="comment">← Priority 2 (local, free)</span>
+    ↓
+<span class="val">OpenRouter</span>   <span class="comment">← Priority 3 (API key fallback)</span>
+    ↓
+<span class="val">Kiro</span>         <span class="comment">← Priority 4 (final fallback)</span>
+    ↓
+<span class="env-key">Model Name: </span><span class="val">omni_combo</span></pre>
+          </div>
+          <div class="box info">
+            <span class="box-icon">ℹ️</span>
+            <span>OmniRoute will automatically fallback to the next provider if one hits a rate limit or fails.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">05</div>
+          <div>
+            <div class="step-title">Create an API Key in Dashboard</div>
+            <div class="step-subtitle">This is your OmniRoute auth token.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Go to <strong>API Keys</strong> in the left sidebar → Generate a new key → Copy it. You'll use this as <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;">YOUR_TOKEN_HERE</code> in the next step.</p>
+          <div class="box tip">
+            <span class="box-icon">💡</span>
+            <span>Generate one key per environment (e.g., "claude-code", "n8n", "dev"). Makes it easy to revoke individual tools later.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">06</div>
+          <div>
+            <div class="step-title">Set Environment Variables</div>
+            <div class="step-subtitle">Open a NEW PowerShell window for this step.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Run these commands in a <strong>new PowerShell window</strong> (replace <code style="background:var(--surface2);padding:2px 5px;border-radius:4px;font-size:11px;font-family:monospace;">YOUR_TOKEN_HERE</code> with your actual key):</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="env-key">$env:CLAUDE_CONFIG_DIR</span>     = <span class="val">"$HOME\.claude-omniroute"</span>
+<span class="env-key">$env:ANTHROPIC_BASE_URL</span>    = <span class="val">"http://localhost:20128"</span>
+<span class="env-key">$env:ANTHROPIC_AUTH_TOKEN</span>  = <span class="val">"YOUR_TOKEN_HERE"</span>
+<span class="env-key">$env:ANTHROPIC_API_KEY</span>     = <span class="val">""</span>
+<span class="env-key">$env:ANTHROPIC_MODEL</span>       = <span class="val">"omni_combo"</span></pre>
+          </div>
+
+          <table class="var-table">
+            <tr><th>Variable</th><th>Purpose</th></tr>
+            <tr><td>CLAUDE_CONFIG_DIR</td><td>Separate Claude config so it doesn't conflict with your main Claude install</td></tr>
+            <tr><td>ANTHROPIC_BASE_URL</td><td>Redirects Claude to your local OmniRoute server</td></tr>
+            <tr><td>ANTHROPIC_AUTH_TOKEN</td><td>Your OmniRoute API key (from Step 5)</td></tr>
+            <tr><td>ANTHROPIC_API_KEY</td><td>Cleared so Claude doesn't try to hit Anthropic directly</td></tr>
+            <tr><td>ANTHROPIC_MODEL</td><td>Tells Claude to use your custom omni_combo</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- STEP 7 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">07</div>
+          <div>
+            <div class="step-title">Verify the Configuration</div>
+            <div class="step-subtitle">Confirm all variables are set correctly.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">In the same PowerShell window, run:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="cmd">echo</span> <span class="val">$env:CLAUDE_CONFIG_DIR</span>
+<span class="cmd">echo</span> <span class="val">$env:ANTHROPIC_BASE_URL</span>
+<span class="cmd">echo</span> <span class="val">$env:ANTHROPIC_MODEL</span></pre>
+          </div>
+          <p class="step-desc">You should see:</p>
+          <div class="code-block">
+            <div class="code-topbar"><span class="code-lang">Expected Output</span></div>
+            <pre><span class="val">C:\Users\YOUR_USERNAME\.claude-omniroute</span>
+<span class="val">http://localhost:20128</span>
+<span class="val">omni_combo</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 8 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">08</div>
+          <div>
+            <div class="step-title">Make Settings Permanent (Optional)</div>
+            <div class="step-subtitle">So you don't have to re-run on every session.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">To persist these variables permanently in Windows, run this in PowerShell (run as Administrator):</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">PowerShell (Admin)</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre>[<span class="val">System.Environment</span>]::<span class="cmd">SetEnvironmentVariable</span>(<span class="val">"CLAUDE_CONFIG_DIR"</span>, <span class="val">"$HOME\.claude-omniroute"</span>, <span class="val">"User"</span>)
+[<span class="val">System.Environment</span>]::<span class="cmd">SetEnvironmentVariable</span>(<span class="val">"ANTHROPIC_BASE_URL"</span>, <span class="val">"http://localhost:20128"</span>, <span class="val">"User"</span>)
+[<span class="val">System.Environment</span>]::<span class="cmd">SetEnvironmentVariable</span>(<span class="val">"ANTHROPIC_AUTH_TOKEN"</span>, <span class="val">"YOUR_TOKEN_HERE"</span>, <span class="val">"User"</span>)
+[<span class="val">System.Environment</span>]::<span class="cmd">SetEnvironmentVariable</span>(<span class="val">"ANTHROPIC_API_KEY"</span>, <span class="val">""</span>, <span class="val">"User"</span>)
+[<span class="val">System.Environment</span>]::<span class="cmd">SetEnvironmentVariable</span>(<span class="val">"ANTHROPIC_MODEL"</span>, <span class="val">"omni_combo"</span>, <span class="val">"User"</span>)</pre>
+          </div>
+          <div class="box info">
+            <span class="box-icon">ℹ️</span>
+            <span>After running, restart PowerShell for changes to take effect.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 9 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">09</div>
+          <div>
+            <div class="step-title">Launch Claude Code!</div>
+            <div class="step-subtitle">Final step — run Claude through OmniRoute.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">PowerShell</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="prompt">PS &gt; </span><span class="cmd">claude</span></pre>
+          </div>
+          <div class="success-banner">
+            <div class="emoji">🎉</div>
+            <h3>Claude Code → OmniRoute → omni_combo</h3>
+            <p>Claude is now routing through your local OmniRoute server with auto-fallback across Antigravity → Ollama → OpenRouter → Kiro. Monitor usage at <strong>localhost:20128/home</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /steps -->
+
+    <!-- QUICK REF -->
+    <div style="margin-top:28px;">
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num" style="background:rgba(0,210,255,0.1);border-color:var(--accent2);color:var(--accent2);">⚡</div>
+          <div>
+            <div class="step-title">Quick Setup — Already Know What You're Doing?</div>
+            <div class="step-subtitle">Full flow in one copy-paste block.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc"><strong>Window 1</strong> — Start server:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">PowerShell — Window 1</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="cmd">npm</span> <span class="flag">i -g</span> <span class="val">omniroute</span>
+<span class="cmd">omniroute</span></pre>
+          </div>
+          <p class="step-desc" style="margin-top:12px;"><strong>Window 2</strong> — Configure & run Claude:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">PowerShell — Window 2</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="env-key">$env:CLAUDE_CONFIG_DIR</span>     = <span class="val">"$HOME\.claude-omniroute"</span>
+<span class="env-key">$env:ANTHROPIC_BASE_URL</span>    = <span class="val">"http://localhost:20128"</span>
+<span class="env-key">$env:ANTHROPIC_AUTH_TOKEN</span>  = <span class="val">"YOUR_TOKEN_HERE"</span>
+<span class="env-key">$env:ANTHROPIC_API_KEY</span>     = <span class="val">""</span>
+<span class="env-key">$env:ANTHROPIC_MODEL</span>       = <span class="val">"omni_combo"</span>
+<span class="cmd">claude</span></pre>
+          </div>
+          <div class="box warn">
+            <span class="box-icon">⚠️</span>
+            <span>These are <strong>Windows PowerShell</strong> commands. Never use <code style="font-family:monospace;font-size:11px;">$env:</code> syntax in macOS Terminal — switch to the macOS tab instead.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panel-win -->
+
+
+  <!-- ══════════════════════════════════════════
+       macOS PANEL
+  ══════════════════════════════════════════ -->
+  <div class="panel" id="panel-mac">
+    <div class="steps">
+
+      <!-- STEP 1 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">01</div>
+          <div>
+            <div class="step-title">Install OmniRoute</div>
+            <div class="step-subtitle">Requires Node.js v18+. Run once globally.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Open <strong>Terminal</strong> (or iTerm2) and run:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Terminal / zsh</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="prompt">$ </span><span class="cmd">npm</span> <span class="flag">i -g</span> <span class="val">omniroute</span></pre>
+          </div>
+          <div class="box info">
+            <span class="box-icon">ℹ️</span>
+            <span>If you get permission errors, try <code style="font-family:monospace;font-size:12px;">sudo npm i -g omniroute</code> or install Node.js via <strong>nvm</strong>.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">02</div>
+          <div>
+            <div class="step-title">Start the OmniRoute Server</div>
+            <div class="step-subtitle">Keep this terminal open the entire time.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">In the same Terminal window, run:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Terminal / zsh</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="prompt">$ </span><span class="cmd">omniroute</span></pre>
+          </div>
+          <div class="box warn">
+            <span class="box-icon">⚠️</span>
+            <span><strong>Do not close this window.</strong> Open a <strong>new Terminal tab/window</strong> (⌘T) for all the following steps.</span>
+          </div>
+          <p class="step-desc">Then open your browser and go to:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Browser URL</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre>http://localhost:20128/home</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">03</div>
+          <div>
+            <div class="step-title">Connect Your AI Providers</div>
+            <div class="step-subtitle">Go to Providers section in the web dashboard.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">In the OmniRoute dashboard, click <strong>Providers</strong> in the left sidebar and add these four:</p>
+          <div class="provider-grid">
+            <div class="provider-chip">
+              <span class="p-name">🔑 Antigravity</span>
+              <span class="p-method">Auth Login (OAuth)</span>
+            </div>
+            <div class="provider-chip">
+              <span class="p-name">🦙 Ollama</span>
+              <span class="p-method">API Key / Local</span>
+            </div>
+            <div class="provider-chip">
+              <span class="p-name">🌐 OpenRouter</span>
+              <span class="p-method">API Key</span>
+            </div>
+            <div class="provider-chip">
+              <span class="p-name">🪁 Kiro</span>
+              <span class="p-method">API Key</span>
+            </div>
+          </div>
+          <div class="box tip" style="margin-top:14px;">
+            <span class="box-icon">✅</span>
+            <span>Free providers like <strong>OpenCode Zen</strong> and <strong>SiliconFlow</strong> require no API key — add them too for maximum free quota!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">04</div>
+          <div>
+            <div class="step-title">Create Your Combo</div>
+            <div class="step-subtitle">Combine all providers into one smart route.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">In the dashboard → <strong>Combos</strong> → Create New Combo. Chain providers in this order and name it <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;">omni_combo</code>:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Combo Config</span>
+            </div>
+            <pre><span class="val">Antigravity</span>  <span class="comment">← Priority 1 (OAuth, subscription-level)</span>
+    ↓
+<span class="val">Ollama</span>       <span class="comment">← Priority 2 (local, free)</span>
+    ↓
+<span class="val">OpenRouter</span>   <span class="comment">← Priority 3 (API key fallback)</span>
+    ↓
+<span class="val">Kiro</span>         <span class="comment">← Priority 4 (final fallback)</span>
+    ↓
+<span class="env-key">Model Name: </span><span class="val">omni_combo</span></pre>
+          </div>
+          <div class="box info">
+            <span class="box-icon">ℹ️</span>
+            <span>OmniRoute will automatically fallback to the next provider if one hits a rate limit or fails.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">05</div>
+          <div>
+            <div class="step-title">Create an API Key in Dashboard</div>
+            <div class="step-subtitle">This is your OmniRoute auth token.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Go to <strong>API Keys</strong> in the left sidebar → Generate a new key → Copy it. You'll use this as <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;">YOUR_TOKEN_HERE</code> in the next step.</p>
+          <div class="box tip">
+            <span class="box-icon">💡</span>
+            <span>Generate one key per environment (e.g., "claude-code", "n8n", "dev"). Makes it easy to revoke individual tools later.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">06</div>
+          <div>
+            <div class="step-title">Set Environment Variables</div>
+            <div class="step-subtitle">Open a NEW Terminal tab (⌘T) for this step.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Run these commands in a <strong>new Terminal window</strong> (replace <code style="background:var(--surface2);padding:2px 5px;border-radius:4px;font-size:11px;font-family:monospace;">YOUR_TOKEN_HERE</code> with your actual key):</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Terminal / zsh</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="cmd">export</span> <span class="env-key">CLAUDE_CONFIG_DIR</span>=<span class="val">"$HOME/.claude-omniroute"</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_BASE_URL</span>=<span class="val">"http://localhost:20128"</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_AUTH_TOKEN</span>=<span class="val">"YOUR_TOKEN_HERE"</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_API_KEY</span>=<span class="val">""</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_MODEL</span>=<span class="val">"omni_combo"</span></pre>
+          </div>
+
+          <table class="var-table">
+            <tr><th>Variable</th><th>Purpose</th></tr>
+            <tr><td>CLAUDE_CONFIG_DIR</td><td>Separate Claude config so it doesn't conflict with your main Claude install</td></tr>
+            <tr><td>ANTHROPIC_BASE_URL</td><td>Redirects Claude to your local OmniRoute server</td></tr>
+            <tr><td>ANTHROPIC_AUTH_TOKEN</td><td>Your OmniRoute API key (from Step 5)</td></tr>
+            <tr><td>ANTHROPIC_API_KEY</td><td>Cleared so Claude doesn't try to hit Anthropic directly</td></tr>
+            <tr><td>ANTHROPIC_MODEL</td><td>Tells Claude to use your custom omni_combo</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- STEP 7 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">07</div>
+          <div>
+            <div class="step-title">Verify the Configuration</div>
+            <div class="step-subtitle">Confirm all variables are set correctly.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">In the same Terminal window, run:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Terminal / zsh</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="cmd">echo</span> <span class="val">$CLAUDE_CONFIG_DIR</span>
+<span class="cmd">echo</span> <span class="val">$ANTHROPIC_BASE_URL</span>
+<span class="cmd">echo</span> <span class="val">$ANTHROPIC_MODEL</span></pre>
+          </div>
+          <p class="step-desc">You should see:</p>
+          <div class="code-block">
+            <div class="code-topbar"><span class="code-lang">Expected Output</span></div>
+            <pre><span class="val">/Users/YOUR_USERNAME/.claude-omniroute</span>
+<span class="val">http://localhost:20128</span>
+<span class="val">omni_combo</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 8 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">08</div>
+          <div>
+            <div class="step-title">Make Settings Permanent</div>
+            <div class="step-subtitle">Persist across all Terminal sessions via .zshrc</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc"><strong>Step 1</strong> — Open your .zshrc file:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Terminal / zsh</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="cmd">nano</span> <span class="val">~/.zshrc</span></pre>
+          </div>
+          <p class="step-desc"><strong>Step 2</strong> — Add these lines at the bottom (paste as-is):</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">~/.zshrc — Add these lines</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="cmd">export</span> <span class="env-key">CLAUDE_CONFIG_DIR</span>=<span class="val">"$HOME/.claude-omniroute"</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_BASE_URL</span>=<span class="val">"http://localhost:20128"</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_AUTH_TOKEN</span>=<span class="val">"YOUR_TOKEN_HERE"</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_API_KEY</span>=<span class="val">""</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_MODEL</span>=<span class="val">"omni_combo"</span></pre>
+          </div>
+          <p class="step-desc"><strong>Step 3</strong> — Save and exit nano:</p>
+          <div class="code-block">
+            <div class="code-topbar"><span class="code-lang">Keyboard Shortcuts in nano</span></div>
+            <pre><span class="comment">Save file:</span>   <span class="val">Ctrl + O</span>  →  press Enter
+<span class="comment">Exit nano:</span>   <span class="val">Ctrl + X</span></pre>
+          </div>
+          <p class="step-desc"><strong>Step 4</strong> — Apply the changes immediately:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Terminal / zsh</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="cmd">source</span> <span class="val">~/.zshrc</span></pre>
+          </div>
+          <div class="box tip">
+            <span class="box-icon">✅</span>
+            <span>From now on, every new Terminal window will automatically have the OmniRoute config loaded — no need to re-run export commands.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 9 -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num">09</div>
+          <div>
+            <div class="step-title">Launch Claude Code!</div>
+            <div class="step-subtitle">Final step — run Claude through OmniRoute.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Terminal / zsh</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="prompt">$ </span><span class="cmd">claude</span></pre>
+          </div>
+          <div class="success-banner">
+            <div class="emoji">🎉</div>
+            <h3>Claude Code → OmniRoute → omni_combo</h3>
+            <p>Claude is now routing through your local OmniRoute server with auto-fallback across Antigravity → Ollama → OpenRouter → Kiro. Monitor usage at <strong>localhost:20128/home</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /steps -->
+
+    <!-- QUICK REF macOS -->
+    <div style="margin-top:28px;">
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num" style="background:rgba(0,210,255,0.1);border-color:var(--accent2);color:var(--accent2);">⚡</div>
+          <div>
+            <div class="step-title">Quick Setup — Already Know What You're Doing?</div>
+            <div class="step-subtitle">Full flow in two terminal windows.</div>
+          </div>
+        </div>
+        <div class="step-body">
+          <p class="step-desc"><strong>Window 1</strong> — Start server:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Terminal — Window 1</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="cmd">npm</span> <span class="flag">i -g</span> <span class="val">omniroute</span>
+<span class="cmd">omniroute</span></pre>
+          </div>
+          <p class="step-desc" style="margin-top:12px;"><strong>Window 2</strong> — Configure & run Claude:</p>
+          <div class="code-block">
+            <div class="code-topbar">
+              <span class="code-lang">Terminal — Window 2</span>
+              <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+            </div>
+            <pre><span class="cmd">export</span> <span class="env-key">CLAUDE_CONFIG_DIR</span>=<span class="val">"$HOME/.claude-omniroute"</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_BASE_URL</span>=<span class="val">"http://localhost:20128"</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_AUTH_TOKEN</span>=<span class="val">"YOUR_TOKEN_HERE"</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_API_KEY</span>=<span class="val">""</span>
+<span class="cmd">export</span> <span class="env-key">ANTHROPIC_MODEL</span>=<span class="val">"omni_combo"</span>
+<span class="cmd">claude</span></pre>
+          </div>
+          <div class="box warn">
+            <span class="box-icon">⚠️</span>
+            <span>These are <strong>macOS zsh</strong> commands. Never use <code style="font-family:monospace;font-size:11px;">export</code> syntax in Windows PowerShell — switch to the Windows tab instead.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panel-mac -->
+
+</div><!-- /os-tabs-wrap -->
+
+<footer>
+  Made for the OmniRoute community · MIT License · <a href="https://github.com/diegosouzapw/OmniRoute" style="color:var(--accent);text-decoration:none;">github.com/diegosouzapw/OmniRoute</a>
+</footer>
+
+<script>
+  function switchTab(os) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.os-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + os).classList.add('active');
+    document.getElementById('tab-' + os).classList.add('active');
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const btn = document.getElementById('themeBtn');
+    if (html.getAttribute('data-theme') === 'dark') {
+      html.setAttribute('data-theme', 'light');
+      btn.textContent = '🌙 Dark';
+    } else {
+      html.setAttribute('data-theme', 'dark');
+      btn.textContent = '☀️ Light';
+    }
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    // Get text without prompt characters
+    const lines = pre.innerText.split('\n').map(l => l.replace(/^[\$\>PS ]+\s*/, '').trim()).filter(Boolean);
+    // For blocks with $ / PS > prompts, remove them; for others keep as-is
+    const rawText = pre.innerText.replace(/^PS > /gm, '').replace(/^\$ /gm, '').trim();
+    navigator.clipboard.writeText(rawText).then(() => {
+      btn.textContent = '✅ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = '📋 Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      btn.textContent = '❌ Failed';
+      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
